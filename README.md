@@ -11,9 +11,9 @@ Once the text is extracted, it is segmented into smaller, manageable chunks. Thi
 Each of the text chunks is then converted into a list format and transformed into numerical vector representations — commonly known as embeddings. These embeddings capture the semantic meaning of the text and enable efficient comparison with user queries.
 # 4.Query Processing and Embedding:
 When a user submits a query, it is similarly converted into an embedding. This allows the system to compare the user’s query against the preprocessed text chunks using vector similarity.
-Similarity Calculation (Cosine Similarity):
+# 5.Similarity Calculation (Cosine Similarity):
 To find the most relevant content, the cosine similarity between the query embedding and each of the text chunk embeddings is computed. This measures how close each chunk is to the user’s intent.
-# 5.Top-k Chunk Selection:
+# 6.Top-k Chunk Selection:
 The system then selects the top k chunks (e.g., top 3) with the highest similarity scores. These chunks are considered the most relevant for answering the user’s query.
-# 6.Response Generation Using Gemini 2.0 Flash:
+# 7.Response Generation Using Gemini 2.0 Flash:
 Finally, the selected chunks are passed to the Gemini 2.0 Flash model along with the user’s query. The model uses this focused context to generate a coherent, accurate, and relevant response.
