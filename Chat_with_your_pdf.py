@@ -110,12 +110,12 @@ if __name__ == "__main__":
         Question: {query}"""
 
         try:
-                # Initialize the model correctly
-                model = genai.GenerativeModel('gemini-2.0-flash')
+            # Initialize the model correctly
+            model = genai.GenerativeModel('gemini-2.0-flash')
 
-                # Generate response with the actual prompt
-                response = model.generate_content(prompt_template)
-                print("\nResponse:")
-                print(response.text)
+            # Generate response with the actual prompt
+            response = model.generate_content(prompt_template)
+            print("\nResponse:")
+            print(response.text)
         except Exception as e:
-                print(f"Error generating response: {str(e)}")
+            print(f"Error generating response: {str(e)}")
