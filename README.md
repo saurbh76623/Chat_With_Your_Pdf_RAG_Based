@@ -16,9 +16,7 @@ pip install -r requirements.txt
 
 Or install individually:
 ```bash
-pip install langchain-openai
-pip install openai
-pip install langchain-community
+pip install langchain
 pip install pymupdf
 pip install sentence-transformers
 pip install google-generativeai

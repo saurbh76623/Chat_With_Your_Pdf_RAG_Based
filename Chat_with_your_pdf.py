@@ -1,16 +1,12 @@
-# # Install necessary langchain components
-# !pip install langchain-openai
-# !pip install openai
-# !pip install langchain-community
+# # Install necessary dependencies
+# !pip install langchain
 # !pip install pymupdf
+# !pip install sentence-transformers
+# !pip install google-generativeai
+# !pip install numpy
 
 
 # import necessary library 
-from langchain_openai import ChatOpenAI    # open ai LLM model
-from langchain import PromptTemplate       # Prompt template for the llm model
-from langchain_community.tools.ddg_search import DuckDuckGoSearchRun   # tool for searching the web 
-from langchain.agents import create_react_agent , AgentExecutor     # agents for the llm 
-from langchain_core.tools import tool
 from sentence_transformers import SentenceTransformer   # used for sentence embeddings
 import fitz  # PyMuPDF  # for extracting text from pdf files 
 from langchain.text_splitter import RecursiveCharacterTextSplitter  # for splitting text into chunks 
@@ -77,7 +73,6 @@ if __name__ == "__main__":
     print(f"Loading PDF: {pdf_path}")
     text = extract_text_from_pdf(pdf_path)
     chunks = split_text_into_chunks(text)
-    chunk_vectors = []
     chunk_vectors = sentence_encode(chunks)
     print(f"PDF loaded successfully! Created {len(chunks)} chunks.\n")
 

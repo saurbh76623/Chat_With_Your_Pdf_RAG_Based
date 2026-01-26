@@ -1,6 +1,4 @@
-langchain-openai
-openai
-langchain-community
+langchain
 pymupdf
 sentence-transformers
 google-generativeai
