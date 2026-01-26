@@ -54,11 +54,32 @@ def cosine_similarity(a, b):
 
 
 if __name__ == "__main__":
-    pdf_path = "/content/Data_Science_Saurabh_Resume (1) (5).pdf"
+    # Get API key from environment variable
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    if not GOOGLE_API_KEY:
+        print("Error: GOOGLE_API_KEY environment variable is not set.")
+        print("Please set it before running the script:")
+        print("  export GOOGLE_API_KEY='your-api-key-here'")
+        exit(1)
+    
+    # Configure the API once at the start
+    genai.configure(api_key=GOOGLE_API_KEY)
+    
+    # Get PDF path from user or environment variable
+    pdf_path = os.getenv("PDF_PATH")
+    if not pdf_path:
+        pdf_path = input("Enter the path to your PDF file: ")
+    
+    if not os.path.exists(pdf_path):
+        print(f"Error: PDF file not found at {pdf_path}")
+        exit(1)
+    
+    print(f"Loading PDF: {pdf_path}")
     text = extract_text_from_pdf(pdf_path)
     chunks = split_text_into_chunks(text)
     chunk_vectors = []
     chunk_vectors = sentence_encode(chunks)
+    print(f"PDF loaded successfully! Created {len(chunks)} chunks.\n")
 
     while True:
         # Get user input
@@ -89,16 +110,11 @@ if __name__ == "__main__":
         for i in top_indices:
             new_context += chunks[i] + "\n"
 
-        GOOGLE_API_KEY = "AIzaSyABtGiltCFuqqdh6Wbcl3MVVVoVu2ZCKyU"
-
         prompt_template = f"""You are a helpful assistant. Answer the question based on the context provided.
         Context: {new_context}
         Question: {query}"""
 
         try:
-                # Configure the API
-                genai.configure(api_key=GOOGLE_API_KEY)
-
                 # Initialize the model correctly
                 model = genai.GenerativeModel('gemini-2.0-flash')
 
