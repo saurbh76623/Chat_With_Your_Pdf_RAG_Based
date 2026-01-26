@@ -1,0 +1,7 @@
+langchain-openai
+openai
+langchain-community
+pymupdf
+sentence-transformers
+google-generativeai
+numpy

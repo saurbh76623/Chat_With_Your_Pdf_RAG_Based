@@ -11,6 +11,11 @@ A Retrieval-Augmented Generation (RAG) based chatbot that allows you to have con
 ### 1. Install Dependencies
 
 ```bash
+pip install -r requirements.txt
+```
+
+Or install individually:
+```bash
 pip install langchain-openai
 pip install openai
 pip install langchain-community
