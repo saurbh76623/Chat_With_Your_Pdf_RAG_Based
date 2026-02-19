@@ -91,7 +91,13 @@ if __name__ == "__main__":
 
     # OPTIMIZATION: Initialize API and model once outside the loop
     # Use environment variable for API key (security best practice)
-    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "AIzaSyABtGiltCFuqqdh6Wbcl3MVVVoVu2ZCKyU")
+    # Note: Replace the default key with your own or set GOOGLE_API_KEY environment variable
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    
+    if not GOOGLE_API_KEY:
+        print("Warning: GOOGLE_API_KEY environment variable not set!")
+        print("Using fallback key - please set your own API key for production use")
+        GOOGLE_API_KEY = "AIzaSyABtGiltCFuqqdh6Wbcl3MVVVoVu2ZCKyU"
     
     # Configure the API once
     genai.configure(api_key=GOOGLE_API_KEY)
@@ -127,7 +133,8 @@ if __name__ == "__main__":
         print("Top chunk indices:", top_indices)
 
         # OPTIMIZATION: Use list comprehension and join instead of string concatenation
-        new_context = "\n".join([chunks[i] for i in top_indices])
+        # Note: Maintaining trailing newline for consistency with original format
+        new_context = "\n".join([chunks[i] for i in top_indices]) + "\n"
 
         prompt_template = f"""You are a helpful assistant. Answer the question based on the context provided.
         Context: {new_context}

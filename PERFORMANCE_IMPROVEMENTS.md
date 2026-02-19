@@ -5,7 +5,7 @@ This document details the performance optimizations implemented in `Chat_with_yo
 
 ## Key Optimizations Implemented
 
-### 1. **Embedding Model Singleton Pattern** (5-30x speedup)
+### 1. **Embedding Model Singleton Pattern** (Critical - eliminates per-query overhead)
 **Problem:** The SentenceTransformer model (~100MB+) was being reloaded from scratch on every query.
 
 **Solution:** Implemented a singleton pattern using a global variable and getter function:
@@ -19,7 +19,7 @@ def get_embedding_model():
     return _embedding_model
 ```
 
-**Impact:** Model loads once at startup, then reuses for all queries. Eliminates 5-30 seconds of overhead per query.
+**Impact:** Model loads once at startup, then reuses for all queries. For N queries, eliminates (N-1) model loads. Each load takes 5-30 seconds, so for 10 queries this alone saves 45-270 seconds.
 
 ---
 
@@ -103,10 +103,14 @@ new_context = "\n".join([chunks[i] for i in top_indices])
 
 **Solution:**
 ```python
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "AIzaSyABtGiltCFuqqdh6Wbcl3MVVVoVu2ZCKyU")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+if not GOOGLE_API_KEY:
+    print("Warning: GOOGLE_API_KEY environment variable not set!")
+    # Use your own key or set environment variable
 ```
 
-**Impact:** Allows secure key management via environment variables while maintaining backward compatibility.
+**Impact:** Allows secure key management via environment variables.
 
 ---
 
