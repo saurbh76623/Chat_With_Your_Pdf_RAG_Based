@@ -17,6 +17,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter  # for splitt
 import numpy as np
 import google.generativeai as genai   
 import os
+import heapq  # for efficient top-k selection
 
 
 
@@ -39,17 +40,45 @@ def split_text_into_chunks(text, chunk_size=1000, chunk_overlap=200):
 
 
 # 3 encode the sentence using sentence transformers 
+# OPTIMIZATION: Initialize model once globally to avoid reloading on every call
+_embedding_model = None
+
+def get_embedding_model():
+    """Get or initialize the embedding model (singleton pattern)"""
+    global _embedding_model
+    if _embedding_model is None:
+        _embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+    return _embedding_model
+
 def sentence_encode(sentences):
-    model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+    model = get_embedding_model()
     embeddings = model.encode(sentences)
     return embeddings
 
 
-# 4. cal cosine similarity between two vectors
+# 4. calculate cosine similarity between vectors
+# OPTIMIZATION: Vectorized computation for batch similarity calculation
 def cosine_similarity(a, b):
+    """Calculate cosine similarity between two vectors"""
     a = np.array(a)
     b = np.array(b)
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+def batch_cosine_similarity(query_vector, chunk_vectors):
+    """Calculate cosine similarity between query and all chunks efficiently"""
+    query_vector = np.array(query_vector).reshape(1, -1)
+    chunk_vectors = np.array(chunk_vectors)
+    
+    # Vectorized dot product
+    dot_products = np.dot(chunk_vectors, query_vector.T).flatten()
+    
+    # Calculate norms
+    query_norm = np.linalg.norm(query_vector)
+    chunk_norms = np.linalg.norm(chunk_vectors, axis=1)
+    
+    # Calculate similarities
+    similarities = dot_products / (chunk_norms * query_norm)
+    return similarities
 
 
 
@@ -60,6 +89,22 @@ if __name__ == "__main__":
     chunk_vectors = []
     chunk_vectors = sentence_encode(chunks)
 
+    # OPTIMIZATION: Initialize API and model once outside the loop
+    # Use environment variable for API key (security best practice)
+    # Note: Replace the default key with your own or set GOOGLE_API_KEY environment variable
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    
+    if not GOOGLE_API_KEY:
+        print("Warning: GOOGLE_API_KEY environment variable not set!")
+        print("Using fallback key - please set your own API key for production use")
+        GOOGLE_API_KEY = "AIzaSyABtGiltCFuqqdh6Wbcl3MVVVoVu2ZCKyU"
+    
+    # Configure the API once
+    genai.configure(api_key=GOOGLE_API_KEY)
+    
+    # Initialize the model once
+    model = genai.GenerativeModel('gemini-2.0-flash')
+
     while True:
         # Get user input
         query = input("\nEnter your question (or 'quit' to exit): ")
@@ -67,41 +112,35 @@ if __name__ == "__main__":
         if query.lower() == 'quit':
             break
 
-        query_vector = sentence_encode([query])
+        # Encode query once
+        query_vector = sentence_encode([query])[0]
         top_k = 3
 
-        similarities = []
-        for idx, chunk_vec in enumerate(chunk_vectors):
-            sim = cosine_similarity(chunk_vec, query_vector[0])
-            similarities.append((sim, idx))
+        # OPTIMIZATION: Use vectorized similarity calculation instead of loop
+        similarities = batch_cosine_similarity(query_vector, chunk_vectors)
+        
+        # Convert to list of tuples (similarity, index) for compatibility
+        similarity_tuples = [(sim, idx) for idx, sim in enumerate(similarities)]
 
-        print("Similarities:", similarities)
+        print("Similarities:", similarity_tuples)
 
         print("==" * 20)
 
-        # Sort by similarity descending and get top_k indices
-        top_chunks = sorted(similarities, reverse=True)[:top_k]
+        # OPTIMIZATION: Use heapq.nlargest for efficient top-k selection
+        top_chunks = heapq.nlargest(top_k, similarity_tuples)
         top_indices = [idx for _, idx in top_chunks]
 
         print("Top chunk indices:", top_indices)
 
-        new_context = ""
-        for i in top_indices:
-            new_context += chunks[i] + "\n"
-
-        GOOGLE_API_KEY = "AIzaSyABtGiltCFuqqdh6Wbcl3MVVVoVu2ZCKyU"
+        # OPTIMIZATION: Use list comprehension and join instead of string concatenation
+        # Note: Maintaining trailing newline for consistency with original format
+        new_context = "\n".join([chunks[i] for i in top_indices]) + "\n"
 
         prompt_template = f"""You are a helpful assistant. Answer the question based on the context provided.
         Context: {new_context}
         Question: {query}"""
 
         try:
-                # Configure the API
-                genai.configure(api_key=GOOGLE_API_KEY)
-
-                # Initialize the model correctly
-                model = genai.GenerativeModel('gemini-2.0-flash')
-
                 # Generate response with the actual prompt
                 response = model.generate_content(prompt_template)
                 print("\nResponse:")
