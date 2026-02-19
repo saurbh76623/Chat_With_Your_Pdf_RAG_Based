@@ -18,3 +18,19 @@ To find the most relevant content, the cosine similarity between the query embed
 The system then selects the top k chunks (e.g., top 3) with the highest similarity scores. These chunks are considered the most relevant for answering the user’s query.
 # 7.Response Generation Using Gemini 2.0 Flash:
 Finally, the selected chunks are passed to the Gemini 2.0 Flash model along with the user’s query. The model uses this focused context to generate a coherent, accurate, and relevant response.
+
+---
+
+## Additional Documentation
+
+### Chatbot Features Guide
+For a comprehensive understanding of chatbot features including **Live Chat**, **Message Templates**, and **Broadcast Training**, please refer to our detailed guide:
+
+📖 **[Chatbot Features Guide](CHATBOT_FEATURES_GUIDE.md)**
+
+This guide covers:
+- **Live Chat**: Real-time communication features and implementation
+- **Message Templates**: Creating reusable, dynamic message structures
+- **Broadcast Training**: Training systems for mass personalized communication
+
+These concepts can be applied to enhance conversational AI systems, including RAG-based applications like this PDF chat tool.
