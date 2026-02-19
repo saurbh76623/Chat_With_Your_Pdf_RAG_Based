@@ -1,6 +1,6 @@
 # Chatbot Features Guide: Live Chat, Message Templates, and Broadcast Training
 
-This guide provides a comprehensive explanation of three key features commonly found in modern chatbot systems, including platforms like Enagti Bot and similar conversational AI solutions.
+This guide provides a comprehensive explanation of three key features commonly found in modern chatbot systems and conversational AI platforms.
 
 ---
 
